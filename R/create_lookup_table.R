@@ -41,20 +41,16 @@ create_lookup_table <- function(conn, lookup_table, source_table, column_name, c
   stopifnot(is.character(column_name), length(column_name) == 1, !is.na(column_name), nzchar(column_name))
   stopifnot(is.character(column_type), length(column_type) == 1, !is.na(column_type), nzchar(column_type))
 
-  lookup_table_id <- DBI::dbQuoteIdentifier(conn, lookup_table)
-  source_table_id <- DBI::dbQuoteIdentifier(conn, source_table)
-  column_name_id <- DBI::dbQuoteIdentifier(conn, column_name)
-
   create_sql <- paste0(
-    "CREATE TABLE IF NOT EXISTS ", lookup_table_id, " (",
-    column_name_id, " ", column_type, " PRIMARY KEY);"
+    "CREATE TABLE IF NOT EXISTS ", lookup_table, " (",
+    column_name, " ", column_type, " PRIMARY KEY);"
   )
   DBI::dbExecute(conn, create_sql)
 
   insert_sql <- paste0(
-    "INSERT INTO ", lookup_table_id, " (", column_name_id, ") ",
-    "SELECT DISTINCT ", column_name_id, " FROM ", source_table_id, " ",
-    "WHERE ", column_name_id, " IS NOT NULL;"
+    "INSERT INTO ", lookup_table, " (", column_name, ") ",
+    "SELECT DISTINCT ", column_name, " FROM ", source_table, " ",
+    "WHERE ", column_name, " IS NOT NULL;"
   )
   DBI::dbExecute(conn, insert_sql)
 
@@ -64,8 +60,8 @@ create_lookup_table <- function(conn, lookup_table, source_table, column_name, c
     "SELECT 1 FROM pg_trigger t ",
     "JOIN pg_class c ON c.oid = t.tgrelid ",
     "JOIN pg_namespace n ON n.oid = c.relnamespace ",
-    "WHERE t.tgname = ", DBI::dbQuoteString(conn, trigger_name), " ",
-    "AND c.relname = ", DBI::dbQuoteString(conn, source_table), " ",
+    "WHERE t.tgname = ", trigger_name, " ",
+    "AND c.relname = ", source_table, " ",
     "AND n.nspname = current_schema()",
     ");"
   )
@@ -73,18 +69,15 @@ create_lookup_table <- function(conn, lookup_table, source_table, column_name, c
   trigger_exists <- DBI::dbGetQuery(conn, trigger_exists_sql)[[1]]
 
   if (!isTRUE(trigger_exists)) {
-    trigger_name_id <- DBI::dbQuoteIdentifier(conn, trigger_name)
-    lookup_table_str <- DBI::dbQuoteString(conn, lookup_table)
-    column_name_str <- DBI::dbQuoteString(conn, column_name)
-
     trigger_sql <- paste0(
-      "CREATE TRIGGER ", trigger_name_id, " ",
-      "AFTER INSERT OR DELETE OR UPDATE ON ", source_table_id, " ",
+      "CREATE TRIGGER ", trigger_name, " ",
+      "AFTER INSERT OR DELETE OR UPDATE ON ", source_table, " ",
       "FOR EACH ROW EXECUTE FUNCTION sync_lookup_generic(",
-      lookup_table_str, ", ", column_name_str, ");"
+      lookup_table, ", ", column_name, ");"
     )
     DBI::dbExecute(conn, trigger_sql)
   }
 
   invisible(NULL)
 }
+
