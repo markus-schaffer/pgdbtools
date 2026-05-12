@@ -1,0 +1,18 @@
+Type: Package
+Package: pgdbtools
+Title: PostgreSQL Database Utility Functions
+Version: 0.1.0
+Authors@R:
+    person("Markus", "Schaffer", , "msch@build.aau.dk", role = c("aut", "cre"))
+Description: A collection of PostgreSQL database utility functions for adding
+    SQL comments to tables and columns, and for creating auto-synchronising
+    lookup tables with triggers.
+License: GPL (>= 3)
+Depends:
+    R (>= 4.1.0)
+Imports:
+    DBI
+Suggests:
+    testthat (>= 3.0.0)
+Encoding: UTF-8
+RoxygenNote: 7.3.3

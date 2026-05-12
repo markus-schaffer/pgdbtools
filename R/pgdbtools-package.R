@@ -1,0 +1,73 @@
+#' pgdbtools: PostgreSQL Database Utility Functions
+#'
+#' @description
+#' `pgdbtools` provides a small collection of utility functions for working
+#' with [PostgreSQL](https://www.postgresql.org/) databases via R. It builds
+#' on top of [DBI](https://dbi.r-dbi.org/) and covers two areas:
+#'
+#' - **SQL comments** — attach human-readable documentation directly to tables
+#'   and columns inside the database, where it is visible to any tool that
+#'   connects (e.g. psql, pgAdmin, DBeaver).
+#' - **Auto-synchronising lookup tables** — create PostgreSQL lookup tables
+#'   that are kept in sync with a source table automatically through a
+#'   PL/pgSQL trigger function, with no manual maintenance required.
+#'
+#' @section SQL comment functions:
+#' | Function | Description |
+#' |---|---|
+#' | [comment_on_table()] | Add a `COMMENT ON TABLE` to a database table |
+#' | [comment_on_column()] | Add a `COMMENT ON COLUMN` to a specific column |
+#'
+#' @section Lookup table functions:
+#' | Function | Description |
+#' |---|---|
+#' | [generic_lookup()] | Install the `sync_lookup_generic` PL/pgSQL trigger function — **run this once** before creating any lookup tables |
+#' | [create_lookup_table()] | Create a lookup table pre-populated from a source column and wired up with an auto-sync trigger |
+#'
+#' @section Typical workflow:
+#' ```r
+#' library(DBI)
+#' library(RPostgres)
+#' library(pgdbtools)
+#'
+#' conn <- dbConnect(Postgres(),
+#'   dbname   = "mydb",
+#'   host     = "localhost",
+#'   user     = Sys.getenv("PG_USER"),
+#'   password = Sys.getenv("PG_PASSWORD")
+#' )
+#'
+#' # --- SQL comments ---
+#' comment_on_table(conn, "events", "Raw event log imported from the API")
+#' comment_on_column(conn, "events", "status", "Lifecycle status code (e.g. 'active', 'closed')")
+#'
+#' # --- Lookup tables ---
+#' # 1. Install the shared trigger function (once per database)
+#' generic_lookup(conn)
+#'
+#' # 2. Create a lookup table that stays in sync with events.status
+#' create_lookup_table(conn, "status_lookup", "events", "status")
+#'
+#' dbDisconnect(conn)
+#' ```
+#'
+#' @section Prerequisites:
+#' - A running PostgreSQL instance accessible via a DBI-compatible driver
+#'   (e.g. [RPostgres](https://rpostgres.r-dbi.org/)).
+#' - [generic_lookup()] must be called **before** [create_lookup_table()] — it
+#'   installs the `sync_lookup_generic` PL/pgSQL function that every lookup
+#'   table trigger depends on. It only needs to be run once per database.
+#'
+#' @references
+#' - DBI: <https://dbi.r-dbi.org/>
+#' - RPostgres: <https://rpostgres.r-dbi.org/>
+#' - PostgreSQL `COMMENT` statement: <https://www.postgresql.org/docs/current/sql-comment.html>
+#' - PostgreSQL trigger functions: <https://www.postgresql.org/docs/current/plpgsql-trigger.html>
+#'
+#' @keywords internal
+"_PACKAGE"
+
+## usethis namespace: start
+#' @importFrom DBI dbExecute dbGetQuery dbQuoteIdentifier dbQuoteString
+## usethis namespace: end
+NULL
