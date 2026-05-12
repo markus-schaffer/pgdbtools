@@ -22,6 +22,6 @@ comment_on_column <- function(conn, table, column, comment) {
   stopifnot(is.character(column), length(column) == 1, !is.na(column), nzchar(column))
   stopifnot(is.character(comment), length(comment) == 1, !is.na(comment), nzchar(comment))
 
-  sql <- paste0("COMMENT ON COLUMN ", table, ".", column, " IS ", comment, ";")
+  sql <- paste0("COMMENT ON COLUMN ", table, ".", column, " IS '", comment, "';")
   DBI::dbExecute(conn, sql)
 }

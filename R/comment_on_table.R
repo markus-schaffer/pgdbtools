@@ -20,6 +20,6 @@ comment_on_table <- function(conn, table, comment) {
   stopifnot(is.character(table), length(table) == 1, !is.na(table), nzchar(table))
   stopifnot(is.character(comment), length(comment) == 1, !is.na(comment), nzchar(comment))
 
-  sql <- paste0("COMMENT ON TABLE ", table, " IS ", comment, ";")
+  sql <- paste0("COMMENT ON TABLE ", table, " IS '", comment, "';")
   DBI::dbExecute(conn, sql)
 }
